@@ -172,10 +172,13 @@ export class WooPublicWebsocket extends BaseWebSocket<Woo> {
     symbol: string,
     callback: (orderBook: OrderBook) => void
   ) => {
-    let timeoutId: NodeJS.Timeout | null = null;
-
     const topic = `${reverseSymbol(symbol)}@orderbookupdate`;
-    const orderBook: OrderBook = { bids: [], asks: [] };
+
+    const orderBook: OrderBook = {
+      bids: [],
+      asks: [],
+    };
+
     const innerState = {
       updates: [] as any[],
       isSnapshotLoaded: false,
@@ -186,37 +189,35 @@ export class WooPublicWebsocket extends BaseWebSocket<Woo> {
         `${ENDPOINTS.ORDERBOOK}/${reverseSymbol(symbol)}`
       );
 
-      if (!this.isDisposed) {
-        orderBook.bids = data.bids.map((row: Record<string, any>) => ({
-          price: row.price,
-          amount: row.quantity,
-          total: 0,
-        }));
+      orderBook.bids = data.bids.map((row: Record<string, any>) => ({
+        price: row.price,
+        amount: row.quantity,
+        total: 0,
+      }));
 
-        orderBook.asks = data.asks.map((row: Record<string, any>) => ({
-          price: row.price,
-          amount: row.quantity,
-          total: 0,
-        }));
+      orderBook.asks = data.asks.map((row: Record<string, any>) => ({
+        price: row.price,
+        amount: row.quantity,
+        total: 0,
+      }));
 
-        // drop events where timestamp is older than the snapshot
-        innerState.updates = innerState.updates.filter(
-          (update: Record<string, any>) => update.ts > data.timestamp
-        );
+      // drop events where timestamp is older than the snapshot
+      innerState.updates = innerState.updates.filter(
+        (update: Record<string, any>) => update.ts > data.timestamp
+      );
 
-        // apply all updates
-        innerState.updates.forEach((update: Record<string, any>) => {
-          this.processOrderBookUpdate(orderBook, update);
-        });
+      // apply all updates
+      innerState.updates.forEach((update: Record<string, any>) => {
+        this.processOrderBookUpdate(orderBook, update);
+      });
 
-        sortOrderBook(orderBook);
-        calcOrderBookTotal(orderBook);
+      sortOrderBook(orderBook);
+      calcOrderBookTotal(orderBook);
 
-        innerState.isSnapshotLoaded = true;
-        innerState.updates = [];
+      innerState.isSnapshotLoaded = true;
+      innerState.updates = [];
 
-        callback(orderBook);
-      }
+      callback(orderBook);
     };
 
     const waitForConnectedAndSubscribe = () => {
@@ -254,7 +255,7 @@ export class WooPublicWebsocket extends BaseWebSocket<Woo> {
           this.ws?.send?.(JSON.stringify(payload));
         }
       } else {
-        timeoutId = setTimeout(() => waitForConnectedAndSubscribe(), 100);
+        setTimeout(() => waitForConnectedAndSubscribe(), 100);
       }
     };
 
@@ -264,13 +265,6 @@ export class WooPublicWebsocket extends BaseWebSocket<Woo> {
       delete this.messageHandlers[topic];
       orderBook.asks = [];
       orderBook.bids = [];
-      innerState.updates = [];
-      innerState.isSnapshotLoaded = false;
-
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-        timeoutId = null;
-      }
 
       if (this.isConnected) {
         const payload = { event: 'unsubscribe', topic };

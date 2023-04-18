@@ -5,8 +5,6 @@ import {
   OrderTimeInForce,
 } from '../../types';
 
- 
-
 export const RECV_WINDOW = 5000;
 export const BASE_URL = {
   livenet: 'http://18.181.186.77/binance-api',
@@ -15,14 +13,29 @@ export const BASE_URL = {
 
 export const BASE_WS_URL = {
   public: {
-    livenet: 'ws://18.181.186.77/binance-ws/ws',
-    testnet: 'ws://18.181.186.77/binance-ws-test/ws',
+    livenet: 'wss://18.181.186.77/binance-ws/ws',
+    testnet: 'wss://18.181.186.77/binance-ws-test/ws',
   },
   private: {
-    livenet: 'ws://18.181.186.77/binance-auth-ws/ws',
-    testnet: 'ws://18.181.186.77/binance-ws-test/ws',
+    livenet: 'wss://18.181.186.77/binance-auth-ws/ws',
+    testnet: 'wss://18.181.186.77/binance-ws-test/ws',
   },
 };
+// export const BASE_URL = {
+//   livenet: 'https://fapi.binance.com',
+//   testnet: 'https://testnet.binancefuture.com',
+// };
+//
+// export const BASE_WS_URL = {
+//   public: {
+//     livenet: 'wss://fstream.binance.com/ws',
+//     testnet: 'wss://stream.binancefuture.com/ws',
+//   },
+//   private: {
+//     livenet: 'wss://fstream-auth.binance.com/ws',
+//     testnet: 'wss://stream.binancefuture.com/ws',
+//   },
+// };
 
 export const ENDPOINTS = {
   BALANCE: '/fapi/v2/balance',

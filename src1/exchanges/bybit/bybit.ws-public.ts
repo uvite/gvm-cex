@@ -163,10 +163,12 @@ export class BybitPublicWebsocket extends BaseWebSocket<Bybit> {
     symbol: string,
     callback: (orderBook: OrderBook) => void
   ) => {
-    let timeoutId: NodeJS.Timeout | null = null;
-
     const topic = `orderBook_200.100ms.${symbol}`;
-    const orderBook: OrderBook = { bids: [], asks: [] };
+
+    const orderBook: OrderBook = {
+      bids: [],
+      asks: [],
+    };
 
     const waitForConnectedAndSubscribe = () => {
       if (this.isConnected) {
@@ -231,7 +233,7 @@ export class BybitPublicWebsocket extends BaseWebSocket<Bybit> {
           this.topics.orderBook = topic;
         }
       } else {
-        timeoutId = setTimeout(() => waitForConnectedAndSubscribe(), 100);
+        setTimeout(() => waitForConnectedAndSubscribe(), 100);
       }
     };
 
@@ -242,11 +244,6 @@ export class BybitPublicWebsocket extends BaseWebSocket<Bybit> {
       delete this.topics.orderBook;
       orderBook.asks = [];
       orderBook.bids = [];
-
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-        timeoutId = null;
-      }
 
       if (this.isConnected) {
         const payload = { op: 'unsubscribe', args: [topic] };
